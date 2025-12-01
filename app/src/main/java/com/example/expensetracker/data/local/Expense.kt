@@ -1,0 +1,15 @@
+package com.example.expensetracker.data.local
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "expense")
+data class Expense(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val label: String,
+    val day:String,
+    val cost: Double,
+    val month: Int,
+    val year: Int
+)
