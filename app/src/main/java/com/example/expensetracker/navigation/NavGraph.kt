@@ -3,6 +3,7 @@ package com.example.expensetracker.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -20,6 +21,7 @@ import com.example.expensetracker.screens.view.ViewExpenseScreen
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavGraph(
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
 ) {
     // --- GET CONTEXT PROPERLY ---
@@ -36,7 +38,8 @@ fun AppNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = "dashboard"
+        startDestination = "dashboard",
+        modifier = modifier
     ) {
         composable("dashboard") {
             DashboardScreen(
@@ -46,5 +49,18 @@ fun AppNavGraph(
             )
         }
 
+//        composable("add") {
+//            AddExpenseScreen(
+//                viewModel = dashboardVM,
+//                onNavigateBack = { navController.popBackStack() }
+//            )
+//        }
+//
+//        composable("view") {
+//            ViewExpenseScreen(
+//                viewModel = dashboardVM,
+//                onNavigateBack = { navController.popBackStack() }
+//            )
+//        }
     }
 }

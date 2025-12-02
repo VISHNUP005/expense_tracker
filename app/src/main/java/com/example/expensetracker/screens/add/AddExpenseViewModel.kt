@@ -33,7 +33,9 @@ class AddExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
                 label = label,
                 cost = cost,
                 month = now.get(Calendar.MONTH) + 1,
-                year = now.get(Calendar.YEAR)
+                year = now.get(Calendar.YEAR),
+                id = TODO(),
+                day = TODO()
             )
 
             repo.addExpense(expense)

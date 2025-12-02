@@ -14,6 +14,9 @@ lifecycleViewmodelKtx = "2.10.0"
 runtime = "1.9.5"
 navigationCompose = "2.9.6"
 animationCoreLint = "1.9.5"
+ksp = "2.0.21-1.0.25"  # Add this line (match with your Kotlin version)
+
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,4 +44,4 @@ androidx-compose-animation-core-lint = { group = "androidx.compose.animation", n
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }  # Add this line
