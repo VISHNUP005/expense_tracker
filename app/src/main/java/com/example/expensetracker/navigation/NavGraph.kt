@@ -10,13 +10,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.expensetracker.data.factory.AddExpenseVMFactory
 import com.example.expensetracker.data.factory.DashboardVMFactory
+import com.example.expensetracker.data.factory.ViewExpenseVMFactory
 import com.example.expensetracker.data.local.AppDatabase
 import com.example.expensetracker.data.repository.ExpenseRepository
 import com.example.expensetracker.screens.add.AddExpenseScreen
+import com.example.expensetracker.screens.add.AddExpenseViewModel
 import com.example.expensetracker.screens.dashboard.DashboardScreen
 import com.example.expensetracker.screens.dashboard.DashboardViewModel
 import com.example.expensetracker.screens.view.ViewExpenseScreen
+import com.example.expensetracker.screens.view.ViewExpenseViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -31,9 +35,18 @@ fun AppNavGraph(
     val db = AppDatabase.getDatabase(context)
     val repo = ExpenseRepository(db.expenseDao())
 
+
     // --- CREATE DASHBOARD VIEWMODEL USING FACTORY ---
     val dashboardVM: DashboardViewModel = viewModel(
         factory = DashboardVMFactory(repo)
+    )
+
+    val viewExpenseVM: ViewExpenseViewModel = viewModel(
+        factory = ViewExpenseVMFactory(repo)
+    )
+
+    val addExpenseVM: AddExpenseViewModel = viewModel(
+        factory = AddExpenseVMFactory(repo)
     )
 
     NavHost(
@@ -44,23 +57,22 @@ fun AppNavGraph(
         composable("dashboard") {
             DashboardScreen(
                 viewModel = dashboardVM,
-                onAddClick = { navController.navigate("add") },
+                onAddClick = { navController.navigate("add_expense") },
                 onViewClick = { navController.navigate("view") }
             )
         }
 
-//        composable("add") {
-//            AddExpenseScreen(
-//                viewModel = dashboardVM,
-//                onNavigateBack = { navController.popBackStack() }
-//            )
-//        }
-//
-//        composable("view") {
-//            ViewExpenseScreen(
-//                viewModel = dashboardVM,
-//                onNavigateBack = { navController.popBackStack() }
-//            )
-//        }
+        composable("add_expense") {
+            AddExpenseScreen(
+                viewModel = addExpenseVM,
+                onSave = { navController.popBackStack() },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable("view") {
+            ViewExpenseScreen(
+                viewModel = viewExpenseVM
+            )
+        }
     }
 }
