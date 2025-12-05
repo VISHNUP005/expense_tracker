@@ -23,7 +23,8 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "expense_database"
-                ).build()
+                )
+                    .setJournalMode(JournalMode.TRUNCATE).build()
                 INSTANCE = instance
                 instance
             }

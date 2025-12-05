@@ -15,10 +15,8 @@ class AddExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
 
     // Exposed states
     private val _label = mutableStateOf("")
-    val label: State<String> = _label
 
     private val _cost = mutableStateOf("")
-    val cost: State<String> = _cost
 
     private val _subtotal = mutableStateOf(0.0)
     val subtotal: State<Double> = _subtotal
@@ -43,7 +41,7 @@ class AddExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
                 val now = Calendar.getInstance()
 
                 val expense = Expense(
-                    id = 0, // Room auto-generates this
+                    id = 0,
                     label = _label.value.trim(),
                     cost = costValue,
                     day = now.get(Calendar.DAY_OF_MONTH).toString(),
@@ -52,12 +50,7 @@ class AddExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
                 )
 
                 repo.addExpense(expense)
-
-                // Clear fields after saving
-                _label.value = ""
-                _cost.value = ""
-
-                // Reload subtotal
+                clearFields()
                 loadCurrentMonthTotal()
             }
         }
