@@ -55,7 +55,6 @@ fun DashboardScreen(
     ) { innerPadding ->
 
         if (!hasData) {
-            // No data state - centered message with buttons
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -70,43 +69,9 @@ fun DashboardScreen(
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
-                Spacer(Modifier.height(32.dp))
-
-                // Add Expense Button
-                Button(
-                    onClick = onAddClick,
-                    modifier = Modifier
-                        .fillMaxWidth(0.7f)
-                        .height(50.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    Text("Add Expense", fontSize = 16.sp)
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                // View Expenses Button
-                OutlinedButton(
-                    onClick = onViewClick,
-                    modifier = Modifier
-                        .fillMaxWidth(0.7f)
-                        .height(50.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Info,
-                        contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    Text("View Expenses", fontSize = 16.sp)
-                }
             }
         } else {
-            // Data available - show dashboard
+
             Column(
                 modifier = Modifier
                     .padding(innerPadding)

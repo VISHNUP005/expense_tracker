@@ -2,20 +2,33 @@ package com.example.expensetracker.screens.add
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Note
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.expensetracker.R
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,139 +38,249 @@ fun AddExpenseScreen(
     onSave: () -> Unit,
     onBack: () -> Unit
 ) {
-    var label by remember { mutableStateOf("") }
-    var cost by remember { mutableStateOf("") }
+    // Collect ViewModel state
+    val itemName by viewModel.label.collectAsState()
+    val amount by viewModel.cost.collectAsState()
+    val todayTotal by viewModel.todayTotal.collectAsState()
+    val selectedCategory by viewModel.category.collectAsState()
+
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var showCategorySheet by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Add Expense") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val categories = listOf(
+        "Food", "Shopping", "Travelling", "Entertainment",
+        "Medical", "Personal Care", "Education", "Bills & Utilities",
+        "Investments", "Rent", "Gifts", "Donation"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.black))
+            .padding(18.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        // Top bar
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Default.Description,
+                    contentDescription = "Back",
+                    tint = colorResource(R.color.soft_blue)
                 )
+            }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Add Transaction",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorResource(R.color.soft_white)
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+
+        Spacer(Modifier.height(24.dp))
+
+        // Today's total card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E2F))
         ) {
-            // Title Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                )
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Current Month Expenses",
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = "₹${String.format("%.2f", viewModel.subtotal.value)}",
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
+                Text(
+                    text = "Today's Expenses",
+                    fontSize = 16.sp,
+                    color = colorResource(R.color.soft_blue_dark)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "₹${String.format("%.2f", todayTotal)}",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorResource(R.color.soft_white)
+                )
             }
+        }
 
-            Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(32.dp))
 
-            // Expense Label Input
-            OutlinedTextField(
-                value = label,
+        // Item name field
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Item",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colorResource(R.color.soft_blue_dark)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            TextField(
+                value = itemName,
                 onValueChange = {
-                    label = it
                     viewModel.updateLabel(it)
                     showError = false
                 },
-                label = { Text("Expense Label") },
-                placeholder = { Text("e.g., Groceries, Transport") },
-                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Enter item", color = Color.Gray) },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFF2A2A3B),
+                    unfocusedContainerColor = Color(0xFF2A2A3B),
+                    focusedTextColor = colorResource(R.color.soft_white),
+                    unfocusedTextColor = colorResource(R.color.soft_white),
+                    cursorColor = colorResource(R.color.soft_white),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Note,
+                        contentDescription = "Item Icon",
+                        tint = colorResource(R.color.soft_blue)
+                    )
+                },
                 singleLine = true,
-                isError = showError && label.isEmpty(),
-                supportingText = {
-                    if (showError && label.isEmpty()) {
-                        Text("Label cannot be empty", color = MaterialTheme.colorScheme.error)
-                    }
-                }
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.fillMaxWidth()
             )
+        }
 
-            Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-            // Cost Input
-            OutlinedTextField(
-                value = cost,
+        // Amount field
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Amount",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colorResource(R.color.soft_blue_dark)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            TextField(
+                value = amount,
                 onValueChange = {
-                    // Only allow numbers and decimal point
                     if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
-                        cost = it
                         viewModel.updateCost(it)
                         showError = false
                     }
                 },
-                label = { Text("Amount") },
-                placeholder = { Text("0.00") },
-                leadingIcon = { Text("₹", fontSize = 18.sp) },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                placeholder = { Text("0.00", color = Color.Gray) },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFF2A2A3B),
+                    unfocusedContainerColor = Color(0xFF2A2A3B),
+                    focusedTextColor = colorResource(R.color.soft_white),
+                    unfocusedTextColor = colorResource(R.color.soft_white),
+                    cursorColor = colorResource(R.color.soft_white),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.AttachMoney,
+                        contentDescription = "Amount Icon",
+                        tint = colorResource(R.color.soft_blue)
+                    )
+                },
                 singleLine = true,
-                isError = showError && (cost.isEmpty() || cost.toDoubleOrNull() == null || cost.toDoubleOrNull() == 0.0),
-                supportingText = {
-                    if (showError && (cost.isEmpty() || cost.toDoubleOrNull() == null || cost.toDoubleOrNull() == 0.0)) {
-                        Text("Please enter a valid amount", color = MaterialTheme.colorScheme.error)
-                    }
-                }
+                shape = RoundedCornerShape(8.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth()
             )
+        }
 
-            Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(16.dp))
 
-            // Error Message
-            if (showError && errorMessage.isNotEmpty()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
+        // Category selector
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Category",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colorResource(R.color.soft_blue_dark)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF2A2A3B), RoundedCornerShape(8.dp))
+                    .clickable {
+                        showCategorySheet = true
+                        coroutineScope.launch { sheetState.show() }
+                    }
+                    .padding(16.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.Category,
+                        contentDescription = "Category Icon",
+                        tint = colorResource(R.color.soft_blue)
+                    )
+                    Spacer(Modifier.width(12.dp))
                     Text(
-                        text = errorMessage,
-                        modifier = Modifier.padding(12.dp),
-                        color = MaterialTheme.colorScheme.onErrorContainer
+                        text = selectedCategory ?: "Select Category",
+                        color = if (selectedCategory == null) Color.Gray else colorResource(R.color.soft_white),
+                        fontSize = 16.sp
                     )
                 }
-                Spacer(Modifier.height(16.dp))
+            }
+        }
+
+        Spacer(Modifier.height(32.dp))
+
+        // Error message
+        if (showError && errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
+
+        // Bottom buttons row
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Cancel button
+            OutlinedButton(
+                onClick = onBack,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = colorResource(R.color.soft_blue)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.height(48.dp)
+            ) {
+                Text(
+                    text = "Cancel",
+                    fontSize = 16.sp
+                )
             }
 
-            // Save Button
+            // Save button
             Button(
                 onClick = {
                     when {
-                        label.trim().isEmpty() -> {
+                        itemName.trim().isEmpty() -> {
                             showError = true
-                            errorMessage = "Please enter an expense label"
+                            errorMessage = "Please enter an item"
                         }
-                        cost.isEmpty() || cost.toDoubleOrNull() == null || cost.toDoubleOrNull() == 0.0 -> {
+                        amount.isEmpty() || amount.toDoubleOrNull() == null || amount.toDoubleOrNull() == 0.0 -> {
                             showError = true
                             errorMessage = "Please enter a valid amount"
+                        }
+                        selectedCategory == null -> {
+                            showError = true
+                            errorMessage = "Please select a category"
                         }
                         else -> {
                             viewModel.addExpense()
@@ -165,26 +288,87 @@ fun AddExpenseScreen(
                         }
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+                    containerColor = colorResource(R.color.soft_blue),
+                    contentColor = colorResource(R.color.black)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.height(48.dp)
             ) {
-                Text("Save Expense", fontSize = 18.sp)
+                Text(
+                    text = "Save",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
+        }
+    }
 
-            Spacer(Modifier.height(16.dp))
-
-            // Cancel Button
-            OutlinedButton(
-                onClick = onBack,
+    // Bottom sheet for category selection
+    if (showCategorySheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showCategorySheet = false
+                coroutineScope.launch { sheetState.hide() }
+            },
+            sheetState = sheetState,
+            containerColor = Color(0xFF1E1E2F)
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .padding(16.dp)
             ) {
-                Text("Cancel", fontSize = 18.sp)
+                Text(
+                    text = "Select Category",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorResource(R.color.soft_white),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(categories) { category ->
+                        Box(
+                            modifier = Modifier
+                                .aspectRatio(1.5f)
+                                .background(
+                                    if (selectedCategory == category)
+                                        colorResource(R.color.soft_blue)
+                                    else
+                                        Color(0xFF2A2A3B),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .clickable {
+                                    viewModel.updateCategory(category)
+                                    showCategorySheet = false
+                                    coroutineScope.launch { sheetState.hide() }
+                                }
+                                .padding(12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = category,
+                                fontSize = 13.sp,
+                                fontWeight = if (selectedCategory == category) FontWeight.Bold else FontWeight.Normal,
+                                color = if (selectedCategory == category)
+                                    colorResource(R.color.black)
+                                else
+                                    colorResource(R.color.soft_white),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
             }
         }
     }

@@ -14,7 +14,8 @@ lifecycleViewmodelKtx = "2.10.0"
 runtime = "1.9.5"
 navigationCompose = "2.9.6"
 animationCoreLint = "1.9.5"
-ksp = "2.0.21-1.0.25"  # Add this line (match with your Kotlin version)
+ksp = "2.0.21-1.0.25"
+foundation = "1.10.0"  # Add this line (match with your Kotlin version)
 
 
 
@@ -39,6 +40,7 @@ androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifec
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-compose-animation-core-lint = { group = "androidx.compose.animation", name = "animation-core-lint", version.ref = "animationCoreLint" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

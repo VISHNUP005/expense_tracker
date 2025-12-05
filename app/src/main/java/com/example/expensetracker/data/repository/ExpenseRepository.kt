@@ -28,6 +28,14 @@ class ExpenseRepository(private val dao: ExpenseDao) {
 
     }
 
+    suspend fun getDailyTotal(day: Int, month: Int, year: Int): Double {
+        return dao.getDailyTotal(day, month, year) ?: 0.0
+    }
+
+
+    suspend fun getExpensesByDay(day: String, month: Int, year: Int): List<Expense> {
+        return dao.getExpensesByDay(day, month, year)
+    }
 
     suspend fun deleteExpense(expense: Expense) {
         dao.deleteExpense(expense)

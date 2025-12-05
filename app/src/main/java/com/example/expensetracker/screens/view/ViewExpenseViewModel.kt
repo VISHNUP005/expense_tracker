@@ -66,7 +66,7 @@ class ViewExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
                     val expenseCalendar = Calendar.getInstance().apply {
                         set(Calendar.YEAR, expense.year)
                         set(Calendar.MONTH, expense.month - 1)
-                        set(Calendar.DAY_OF_MONTH, expense.day.toIntOrNull() ?: 1)
+                        set(Calendar.DAY_OF_MONTH, expense.day)
                     }
                     val expenseWeek = expenseCalendar.get(Calendar.WEEK_OF_YEAR)
                     val expenseYear = expense.year

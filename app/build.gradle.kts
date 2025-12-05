@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.animation.core.lint)
+    implementation(libs.androidx.compose.foundation)
 
     // Room - Updated with KSP
     val roomVersion = "2.6.1"
@@ -67,4 +68,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
 }

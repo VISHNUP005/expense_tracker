@@ -56,7 +56,7 @@ class DashboardViewModel(
         for (expense in expenses) {
             try {
                 // Convert day string to int
-                val day = expense.day.toIntOrNull() ?: continue
+                val day = expense.day
 
                 when (day) {
                     in 1..7 -> result["Week 1"] = result["Week 1"]!! + expense.cost
