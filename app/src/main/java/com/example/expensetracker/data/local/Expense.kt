@@ -2,6 +2,7 @@ package com.example.expensetracker.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Entity(tableName = "expense")
 data class Expense(
@@ -11,5 +12,6 @@ data class Expense(
     val day: Int,
     val cost: Double,
     val month: Int,
-    val year: Int
+    val year: Int,
+    val category: String?
 )

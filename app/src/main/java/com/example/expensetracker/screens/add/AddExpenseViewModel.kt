@@ -36,7 +36,6 @@ class AddExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
 
     fun updateCost(value: String) {
         _cost.value = value
-        // Update preview total as user types
         updatePreviewTotal()
     }
 
@@ -75,18 +74,19 @@ class AddExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
                     cost = costValue,
                     day = now.get(Calendar.DAY_OF_MONTH),
                     month = now.get(Calendar.MONTH) + 1,
-                    year = now.get(Calendar.YEAR)
+                    year = now.get(Calendar.YEAR),
+                    category = category.value
                 )
 
                 repo.addExpense(expense)
                 clearFields()
-                loadTodayTotal() // refresh after save
+                loadTodayTotal()
             }
         }
     }
 
-    /** Load total for current day from DB **/
-    private fun loadTodayTotal() {
+    /** Load total for current day from DB - Call this when screen becomes visible **/
+    fun loadTodayTotal() {
         viewModelScope.launch {
             val now = Calendar.getInstance()
             val day = now.get(Calendar.DAY_OF_MONTH).toString()
@@ -98,7 +98,11 @@ class AddExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
         }
     }
 
-    /** Clear input fields **/
+    /** Call this method when the screen is resumed/visible **/
+    fun refreshData() {
+        loadTodayTotal()
+    }
+
     fun clearFields() {
         _label.value = ""
         _cost.value = ""

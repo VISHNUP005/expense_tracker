@@ -1,5 +1,4 @@
 package com.example.expensetracker.screens.add
-
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -38,7 +37,10 @@ fun AddExpenseScreen(
     onSave: () -> Unit,
     onBack: () -> Unit
 ) {
-    // Collect ViewModel state
+    LaunchedEffect(Unit) {
+        viewModel.refreshData()
+    }
+
     val itemName by viewModel.label.collectAsState()
     val amount by viewModel.cost.collectAsState()
     val todayTotal by viewModel.todayTotal.collectAsState()
@@ -304,7 +306,7 @@ fun AddExpenseScreen(
         }
     }
 
-    // Bottom sheet for category selection
+
     if (showCategorySheet) {
         ModalBottomSheet(
             onDismissRequest = {
@@ -367,7 +369,6 @@ fun AddExpenseScreen(
                         }
                     }
                 }
-
                 Spacer(Modifier.height(16.dp))
             }
         }
