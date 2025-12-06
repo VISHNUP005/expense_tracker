@@ -342,7 +342,8 @@ fun AddExpenseScreen(
                         .heightIn(max = 400.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                )
+                {
                     items(categories) { category ->
                         Box(
                             modifier = Modifier
@@ -382,7 +383,18 @@ fun AddExpenseScreen(
                                     else
                                         colorResource(R.color.soft_white),
                                     textAlign = TextAlign.Center,
-                                    maxLines = 2
+                                    maxLines = 2,
+                                    lineHeight = 14.sp,
+                                    style = LocalTextStyle.current.copy(
+                                        fontSize = 12.sp,
+                                        lineHeight = 14.sp
+                                    ),
+                                    onTextLayout = { textLayoutResult ->
+                                        if (textLayoutResult.lineCount > 1) {
+                                            // Text wraps to second line
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
                         }

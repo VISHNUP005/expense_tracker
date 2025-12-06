@@ -41,6 +41,10 @@ android {
 }
 
 dependencies {
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
+    implementation("androidx.activity:activity-compose:1.9.3")
+
+    // Your update dependencies
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")
     implementation(libs.androidx.core.ktx)
