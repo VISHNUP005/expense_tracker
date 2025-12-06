@@ -1,6 +1,7 @@
 package com.example.expensetracker.screens.add
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,8 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.expensetracker.R
@@ -53,10 +56,21 @@ fun AddExpenseScreen(
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    data class CategoryItem(val name: String, val iconRes: Int)
+
     val categories = listOf(
-        "Food", "Shopping", "Travelling", "Entertainment",
-        "Medical", "Personal Care", "Education", "Bills & Utilities",
-        "Investments", "Rent", "Gifts", "Donation"
+        CategoryItem("Food", R.drawable.food),
+        CategoryItem("Shopping", R.drawable.shopping),
+        CategoryItem("Travelling", R.drawable.travel),
+        CategoryItem("Entertainment", R.drawable.cinema),
+        CategoryItem("Medical", R.drawable.medicine),
+        CategoryItem("Personal Care", R.drawable.personal),
+        CategoryItem("Education", R.drawable.education),
+        CategoryItem("Bills & Utilities", R.drawable.bill),
+        CategoryItem("Investments", R.drawable.investment),
+        CategoryItem("Rent", R.drawable.rent),
+        CategoryItem("Gifts", R.drawable.giftbox),
+        CategoryItem("Donation", R.drawable.donation)
     )
 
     Column(
@@ -71,14 +85,6 @@ fun AddExpenseScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.Description,
-                    contentDescription = "Back",
-                    tint = colorResource(R.color.soft_blue)
-                )
-            }
-            Spacer(Modifier.width(8.dp))
             Text(
                 text = "Add Transaction",
                 fontSize = 22.sp,
@@ -340,32 +346,45 @@ fun AddExpenseScreen(
                     items(categories) { category ->
                         Box(
                             modifier = Modifier
-                                .aspectRatio(1.5f)
+                                .aspectRatio(1f)
                                 .background(
-                                    if (selectedCategory == category)
+                                    if (selectedCategory == category.name)
                                         colorResource(R.color.soft_blue)
                                     else
                                         Color(0xFF2A2A3B),
                                     shape = RoundedCornerShape(12.dp)
                                 )
                                 .clickable {
-                                    viewModel.updateCategory(category)
+                                    viewModel.updateCategory(category.name)
                                     showCategorySheet = false
                                     coroutineScope.launch { sheetState.hide() }
                                 }
-                                .padding(12.dp),
-                            contentAlignment = Alignment.Center
+                                .padding(12.dp)
                         ) {
-                            Text(
-                                text = category,
-                                fontSize = 13.sp,
-                                fontWeight = if (selectedCategory == category) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedCategory == category)
-                                    colorResource(R.color.black)
-                                else
-                                    colorResource(R.color.soft_white),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(id = category.iconRes),
+                                    contentDescription = category.name,
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .padding(bottom = 8.dp)
+                                )
+                                Text(
+                                    text = category.name,
+                                    fontSize = 12.sp,
+                                    fontWeight = if (selectedCategory == category.name) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (selectedCategory == category.name)
+                                        colorResource(R.color.black)
+                                    else
+                                        colorResource(R.color.soft_white),
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 2
+                                )
+                            }
                         }
                     }
                 }
