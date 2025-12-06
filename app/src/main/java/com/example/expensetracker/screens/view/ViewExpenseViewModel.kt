@@ -1,3 +1,4 @@
+// ViewExpenseViewModel.kt
 package com.example.expensetracker.screens.view
 
 import androidx.compose.runtime.State
@@ -15,14 +16,13 @@ enum class FilterType {
 
 class ViewExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
 
-    // Exposed states
     private val _expenses = mutableStateOf<List<Expense>>(emptyList())
     val expenses: State<List<Expense>> = _expenses
 
     private val _filteredExpenses = mutableStateOf<List<Expense>>(emptyList())
     val filteredExpenses: State<List<Expense>> = _filteredExpenses
 
-    private val _currentFilter = mutableStateOf(FilterType.ALL)
+    private val _currentFilter = mutableStateOf(FilterType.MONTHLY)
     val currentFilter: State<FilterType> = _currentFilter
 
     private val _totalAmount = mutableStateOf(0.0)
@@ -35,7 +35,9 @@ class ViewExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
     private fun loadAllExpenses() {
         viewModelScope.launch {
             repo.getAllExpenses().collect { expenseList ->
-                _expenses.value = expenseList
+                _expenses.value = expenseList.sortedByDescending {
+                    it.year * 10000 + it.month * 100 + it.day
+                }
                 applyFilter(_currentFilter.value)
             }
         }
@@ -76,7 +78,6 @@ class ViewExpenseViewModel(private val repo: ExpenseRepository) : ViewModel() {
             }
         }
 
-        // Calculate total for filtered expenses
         _totalAmount.value = _filteredExpenses.value.sumOf { it.cost }
     }
 
